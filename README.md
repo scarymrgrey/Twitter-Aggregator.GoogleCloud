@@ -7,7 +7,7 @@
 - gcloud CLI installed
 
 ## General info
-Unfortunately I haven't found nice and easy way to include Dataflow resource into the deployment conf so that several additional commands are needed to deploy it.
+Unfortunately I haven't found nice and easy way to include Dataflow resource into the deployment conf so several additional commands are needed to deploy it.
 
 ## How to run
 
