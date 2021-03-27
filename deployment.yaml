@@ -1,0 +1,100 @@
+resources:
+- type: storage.v1.bucket
+  name: feedex-tweets-bucket-4
+  properties:
+    project: fedex-twitter-4
+    name: test-bucket-name
+
+- type: gcp-types/pubsub-v1:projects.topics 
+  name: projects/fedex-twitter-4/topics/CONTROL_QUEUE
+  properties:
+    topic: CONTROL_QUEUE
+
+- type: gcp-types/pubsub-v1:projects.topics
+  name: projects/fedex-twitter-4/topics/tweets-topic
+  properties:
+    topic: tweets-topic
+
+- type: gcp-types/pubsub-v1:projects.subscriptions 
+  name: projects/fedex-twitter-4/subscriptions/pubsub2bq 
+  properties:
+    topic: projects/fedex-twitter-4/topics/tweets-topic
+    subscription: pubsub2bq
+
+- type: bigquery.v2.dataset
+  name: projects/fedex-twitter-4/datasets/tweetsds 
+  properties:
+    location: EU
+    datasetReference:
+      datasetId: tweetsds
+      projectId: fedex-twitter-4
+
+- type: gcp-types/bigquery-v2:tables
+  name: projects/fedex-twitter-4/tables/aggregated 
+  properties:
+    tableReference:
+      datasetId: tweetsds
+      projectId: fedex-twitter-4
+      tableId: aggregated
+
+    schema:
+      fields:
+        - name: trends
+          type: STRING
+        - name: count
+          type: INTEGER
+
+- type: gcp-types/bigquery-v2:tables
+  name: projects/fedex-twitter-4/tables/tweets 
+  properties:
+    tableReference:
+      datasetId: tweetsds
+      projectId: fedex-twitter-4
+      tableId: tweets
+
+    schema:
+      fields:
+        - name: tweet_text
+          type: STRING
+
+- type: gcp-types/cloudfunctions-v1:projects.locations.functions
+  name: projects/fedex-twitter-4/locations/europe-west1/functions/aggregate_feed
+  properties:
+    parent: projects/fedex-twitter-4/locations/europe-west1
+    function: aggregate_feed
+    sourceUploadUrl: ./src/agg
+    entryPoint: tweets_control_pubsub
+    runtime: python38
+    eventTrigger:
+      resource: projects/fedex-twitter-4/topics/CONTROL_QUEUE
+      eventType: providers/cloud.pubsub/eventTypes/topic.publish
+
+- type: gcp-types/cloudfunctions-v1:projects.locations.functions
+  name: projects/fedex-twitter-4/locations/europe-west1/functions/consume_feed
+  properties:
+    parent: projects/fedex-twitter-4/locations/europe-west1
+    function: consume_feed
+    sourceUploadUrl: ./src/consumer
+    entryPoint: consume_feed
+    runtime: python38
+    environmentVariables:
+      TWITTER_API_KEY: your_value
+      TWITTER_API_SECRET_KEY: your_value
+      TWITTER_ACCESS_TOKEN: your_value
+      TWITTER_ACCESS_TOKEN_SECRET: your_value
+      COUNTRY: Netherlands
+      DATE_SINCE: "202103250000"
+    eventTrigger:
+      resource: projects/fedex-twitter-4/topics/CONTROL_QUEUE
+      eventType: providers/cloud.pubsub/eventTypes/topic.publish
+
+- type: gcp-types/cloudfunctions-v1:projects.locations.functions
+  name: projects/fedex-twitter-4/locations/europe-west1/functions/expose_data_http
+  properties:
+    parent: projects/fedex-twitter-4/locations/europe-west1
+    function: expose_data_http
+    sourceUploadUrl: ./src/http-server
+    entryPoint: start_http
+    runtime: python38
+    httpsTrigger:
+      securityLevel: SECURITY_LEVEL_UNSPECIFIED
