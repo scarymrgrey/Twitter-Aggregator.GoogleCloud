@@ -1,3 +1,4 @@
+cmd /c gcloud services enable deploymentmanager.googleapis.com  
 cmd /c gcloud services enable compute.googleapis.com
 cmd /c gcloud services enable dataflow.googleapis.com
 cmd /c gcloud services enable cloudbuild.googleapis.com
