@@ -14,7 +14,7 @@ def execute_aggregations():
     client = bigquery.Client()
 
     query = """
-        SELECT * FROM `fedex-twitter.tweetsds.aggregated` ORDER BY Count DESC LIMIT 20
+        SELECT * FROM `tweetsds.aggregated` ORDER BY Count DESC LIMIT 20
     """
     query_job = client.query(query)
     return query_job

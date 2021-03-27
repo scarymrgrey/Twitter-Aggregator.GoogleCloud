@@ -1,13 +1,15 @@
+import os
 def execute_aggregations():
     from google.cloud import bigquery
     client = bigquery.Client()
 
-    query = """
+    project_name = os.environ.get("projectId", 'Specified environment variable is not set.')
+    query = f"""
         INSERT tweetsds.aggregated (trends, count)
         WITH t AS (
             SELECT 
                 REGEXP_EXTRACT_ALL(tweet_text, r"#(\w+)") AS hashtags
-                FROM `fedex-twitter.tweetsds.tweets`
+                FROM `{project_name}.tweetsds.tweets`
             )
 
         SELECT unnested_hashtags AS trend , count(unnested_hashtags) as count FROM t, UNNEST(t.hashtags) unnested_hashtags

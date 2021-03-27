@@ -1,0 +1,102 @@
+resources:
+- type: storage.v1.bucket
+  name: {{ properties['bucket-name'] }}
+  properties:
+    project: {{ properties['project-name'] }}
+    name: {{ properties['bucket-name'] }}
+
+- type: gcp-types/pubsub-v1:projects.topics 
+  name: projects/{{ properties['project-name'] }}/topics/CONTROL_QUEUE
+  properties:
+    topic: CONTROL_QUEUE
+
+- type: gcp-types/pubsub-v1:projects.topics
+  name: projects/{{ properties['project-name'] }}/topics/tweets-topic
+  properties:
+    topic: tweets-topic
+
+- type: gcp-types/pubsub-v1:projects.subscriptions 
+  name: projects/{{ properties['project-name'] }}/subscriptions/pubsub2bq 
+  properties:
+    topic: projects/{{ properties['project-name'] }}/topics/tweets-topic
+    subscription: pubsub2bq
+
+- type: bigquery.v2.dataset
+  name: projects/{{ properties['project-name'] }}/datasets/tweetsds 
+  properties:
+    location: EU
+    datasetReference:
+      datasetId: tweetsds
+      projectId: {{ properties['project-name'] }}
+
+- type: gcp-types/bigquery-v2:tables
+  name: projects/{{ properties['project-name'] }}/tables/aggregated 
+  properties:
+    tableReference:
+      datasetId: tweetsds
+      projectId: {{ properties['project-name'] }}
+      tableId: aggregated
+
+    schema:
+      fields:
+        - name: trends
+          type: STRING
+        - name: count
+          type: INTEGER
+
+- type: gcp-types/bigquery-v2:tables
+  name: projects/{{ properties['project-name'] }}/tables/tweets 
+  properties:
+    tableReference:
+      datasetId: tweetsds
+      projectId: {{ properties['project-name'] }}
+      tableId: tweets
+
+    schema:
+      fields:
+        - name: tweet_text
+          type: STRING
+
+- type: gcp-types/cloudfunctions-v1:projects.locations.functions
+  name: projects/{{ properties['project-name'] }}/locations/europe-west1/functions/aggregate_feed
+  properties:
+    parent: projects/{{ properties['project-name'] }}/locations/europe-west1
+    function: aggregate_feed
+    sourceUploadUrl: ./src/agg
+    entryPoint: tweets_control_pubsub
+    runtime: python38
+    environmentVariables:
+      projectId: {{ properties['project-name'] }}
+    eventTrigger:
+      resource: projects/{{ properties['project-name'] }}/topics/CONTROL_QUEUE
+      eventType: providers/cloud.pubsub/eventTypes/topic.publish
+
+- type: gcp-types/cloudfunctions-v1:projects.locations.functions
+  name: projects/{{ properties['project-name'] }}/locations/europe-west1/functions/consume_feed
+  properties:
+    parent: projects/{{ properties['project-name'] }}/locations/europe-west1
+    function: consume_feed
+    sourceUploadUrl: ./src/consumer
+    entryPoint: consume_feed
+    runtime: python38
+    environmentVariables:
+      TWITTER_API_KEY: {{ properties['TWITTER_API_KEY'] }}
+      TWITTER_API_SECRET_KEY: {{ properties['TWITTER_API_SECRET_KEY'] }}
+      TWITTER_ACCESS_TOKEN: {{ properties['TWITTER_ACCESS_TOKEN'] }}
+      TWITTER_ACCESS_TOKEN_SECRET: {{ properties['TWITTER_ACCESS_TOKEN_SECRET'] }}
+      COUNTRY: {{ properties['COUNTRY'] }}
+      DATE_SINCE: {{ properties['DATE_SINCE'] }}
+    eventTrigger:
+      resource: projects/{{ properties['project-name'] }}/topics/CONTROL_QUEUE
+      eventType: providers/cloud.pubsub/eventTypes/topic.publish
+
+- type: gcp-types/cloudfunctions-v1:projects.locations.functions
+  name: projects/{{ properties['project-name'] }}/locations/europe-west1/functions/expose_data_http
+  properties:
+    parent: projects/{{ properties['project-name'] }}/locations/europe-west1
+    function: expose_data_http
+    sourceUploadUrl: ./src/http-server
+    entryPoint: start_http
+    runtime: python38
+    httpsTrigger:
+      securityLevel: SECURITY_LEVEL_UNSPECIFIED
