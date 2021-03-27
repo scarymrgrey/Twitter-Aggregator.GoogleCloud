@@ -9,6 +9,11 @@
 ## General info
 Unfortunately I haven't found nice and easy way to include Dataflow resource into the deployment conf so several additional commands are needed to deploy it.
 
+Branches:
+
+    - https://github.com/scarymrgrey/Twitter-Aggregator.GoogleCloud
+    - https://github.com/scarymrgrey/Twitter-Aggregator.GoogleCloud/tree/gcp-deployment-manager
+
 ## How to run
 
 1) in cmd - ```gcloud projects create fedex-twitter --set-as-default```
