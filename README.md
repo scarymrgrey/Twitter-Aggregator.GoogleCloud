@@ -8,6 +8,7 @@
 
 ## General info
 Unfortunately I haven't found nice and easy way to include Dataflow resource into the deployment conf so several additional commands are needed to deploy it.
+Jinja templating is used in order to keep configuration separatly from blueprint.
 
 Branches:
 
