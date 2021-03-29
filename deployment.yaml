@@ -7,11 +7,5 @@ resources:
   type: twitter-aggregator.jinja
   properties:
     description: "Twitter aggregator"
-    project-name: twitter-aggregator-fedex-kp
-    bucket-name: twitter-aggregator-fedex-bucket-kp
-    TWITTER_API_KEY: YOUR_VALUE
-    TWITTER_API_SECRET_KEY: YOUR_VALUE
-    TWITTER_ACCESS_TOKEN: YOUR_VALUE
-    TWITTER_ACCESS_TOKEN_SECRET: YOUR_VALUE
-    COUNTRY: Netherlands
-    DATE_SINCE: YOUR_VALUE_IN_FORMAT_202103250000
+    project-name: YOUR_VALUE
+    bucket-name: YOUR_VALUE
