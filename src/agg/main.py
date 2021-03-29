@@ -9,7 +9,7 @@ def execute_aggregations():
         WITH t AS (
             SELECT 
                 REGEXP_EXTRACT_ALL(tweet_text, r"#(\w+)") AS hashtags
-                FROM `{project_name}.tweetsds.tweets`
+                FROM `tweetsds.tweets`
             )
 
         SELECT unnested_hashtags AS trend , count(unnested_hashtags) as count FROM t, UNNEST(t.hashtags) unnested_hashtags
