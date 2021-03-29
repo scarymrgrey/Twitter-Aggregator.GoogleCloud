@@ -14,3 +14,4 @@ gsutil cp ./src/http-server/artifact.zip gs://${BUCKET_NAME}/http-server/
 gcloud deployment-manager deployments create fedex-twitter-deployment --config deployment.yaml
 gcloud dataflow jobs run pubsub2bq --region europe-west1 --gcs-location gs://dataflow-templates/latest/PubSub_Subscription_to_BigQuery --staging-location gs://${BUCKET_NAME}/staging --parameters inputSubscription=projects/${PROJECT_NAME}/subscriptions/pubsub2bq,outputTableSpec=${PROJECT_NAME}:tweetsds.tweets
 gcloud functions call consume_feed --region europe-west1 --data  "{\"data\":\"CONSUME_FEED\"}"
+gcloud functions add-iam-policy-binding expose_data_http --region europe-west1 --member="allUsers" --role="roles/cloudfunctions.invoker" 
