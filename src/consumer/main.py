@@ -19,7 +19,8 @@ def callback(future):
 
 
 def publish_success_to_control_pubsub(future):
-    topic_path = publisher.topic_path("fedex-twitter", "CONTROL_QUEUE")
+    project_id = env("PROJECT_ID")
+    topic_path = publisher.topic_path(project_id, "CONTROL_QUEUE")
     new_future = publisher.publish(topic_path, get_message("AGGREGATE_FEED"))
     new_future.add_done_callback(callback)
 
@@ -29,6 +30,7 @@ def execute_consume_feed():
     api_secret_key = env("TWITTER_API_SECRET_KEY")
     access_token = env("TWITTER_ACCESS_TOKEN")
     access_token_secret = env("TWITTER_ACCESS_TOKEN_SECRET")
+    project_id = env("PROJECT_ID")
     auth = tweepy.OAuthHandler(api_key, api_secret_key)
     auth.set_access_token(access_token, access_token_secret)
     api = tweepy.API(auth)
@@ -40,7 +42,7 @@ def execute_consume_feed():
     tweets = tweepy.Cursor(api.search_full_archive, environment_name='dev', query=search_words,
                            fromDate=date_since_pro).items()
 
-    topic_path = publisher.topic_path("fedex-twitter", "tweets-topic")
+    topic_path = publisher.topic_path(project_id, "tweets-topic")
 
     latest_future = pubsub_v1.publisher.futures.Future()
     for tweet in tweets:

@@ -62,11 +62,11 @@ resources:
   properties:
     parent: projects/{{ properties['project-name'] }}/locations/europe-west1
     function: aggregate_feed
-    sourceUploadUrl: ./src/agg
+    sourceArchiveUrl: gs://{{ properties['bucket-name'] }}/agg/artifact.zip
     entryPoint: tweets_control_pubsub
     runtime: python38
     environmentVariables:
-      projectId: {{ properties['project-name'] }}
+      PROJECT_ID: {{ properties['project-name'] }}
     eventTrigger:
       resource: projects/{{ properties['project-name'] }}/topics/CONTROL_QUEUE
       eventType: providers/cloud.pubsub/eventTypes/topic.publish
@@ -76,7 +76,7 @@ resources:
   properties:
     parent: projects/{{ properties['project-name'] }}/locations/europe-west1
     function: consume_feed
-    sourceUploadUrl: ./src/consumer
+    sourceArchiveUrl: gs://{{ properties['bucket-name'] }}/consumer/artifact.zip
     entryPoint: consume_feed
     runtime: python38
     environmentVariables:
@@ -86,6 +86,7 @@ resources:
       TWITTER_ACCESS_TOKEN_SECRET: {{ properties['TWITTER_ACCESS_TOKEN_SECRET'] }}
       COUNTRY: {{ properties['COUNTRY'] }}
       DATE_SINCE: {{ properties['DATE_SINCE'] }}
+      PROJECT_ID: {{ properties['project-name'] }}
     eventTrigger:
       resource: projects/{{ properties['project-name'] }}/topics/CONTROL_QUEUE
       eventType: providers/cloud.pubsub/eventTypes/topic.publish
@@ -95,7 +96,7 @@ resources:
   properties:
     parent: projects/{{ properties['project-name'] }}/locations/europe-west1
     function: expose_data_http
-    sourceUploadUrl: ./src/http-server
+    sourceArchiveUrl: gs://{{ properties['bucket-name'] }}/http-server/artifact.zip
     entryPoint: start_http
     runtime: python38
     httpsTrigger:

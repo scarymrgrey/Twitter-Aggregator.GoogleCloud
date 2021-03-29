@@ -3,7 +3,7 @@ def execute_aggregations():
     from google.cloud import bigquery
     client = bigquery.Client()
 
-    project_name = os.environ.get("projectId", 'Specified environment variable is not set.')
+    project_name = os.environ.get("PROJECT_ID", 'Specified environment variable is not set.')
     query = f"""
         INSERT tweetsds.aggregated (trends, count)
         WITH t AS (
